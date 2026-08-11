@@ -1,0 +1,19 @@
+{
+  "name": "crypto-data-proxy",
+  "version": "1.0.0",
+  "description": "Production backend proxy with API-key rotation for Kraken, Binance, CoinMarketCap, CoinAPI, CoinGecko, Coinbase, CoinPaprika, and DexScreener.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "lru-cache": "^11.0.2",
+    "winston": "^3.17.0"
+  }
+}

@@ -1,0 +1,2994 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProSignal — Trading Insights Engine</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg0: #080810;
+        --bg1: #0e0e18;
+        --bg2: #151524;
+        --bg3: #1c1c32;
+        --bg4: #252545;
+        --tx1: #e2e2f0;
+        --tx2: #9090a8;
+        --tx3: #5c5c72;
+        --accent: #d4a017;
+        --accent-dim: #9e7810;
+        --accent-glow: rgba(212, 160, 23, 0.15);
+        --buy: #00c896;
+        --buy-dim: rgba(0, 200, 150, 0.12);
+        --buy-glow: rgba(0, 200, 150, 0.25);
+        --sell: #ff4757;
+        --sell-dim: rgba(255, 71, 87, 0.12);
+        --sell-glow: rgba(255, 71, 87, 0.25);
+        --neut: #787b8e;
+        --neut-dim: rgba(120, 123, 142, 0.1);
+        --border: #1e1e35;
+        --radius: 10px;
+        --font-ui: "Space Grotesk", sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font-ui);
+        background: var(--bg0);
+        color: var(--tx1);
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg1);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--bg4);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-dim);
+      }
+      .mono {
+        font-family: var(--font-mono);
+      }
+
+      /* Data Source Banner */
+      .data-banner {
+        background: linear-gradient(90deg, #5c2d00, #7a3a00, #5c2d00);
+        border-bottom: 1px solid #8b4513;
+        padding: 8px 24px;
+        text-align: center;
+        font-size: 0.72rem;
+        color: #ffd699;
+        letter-spacing: 0.02em;
+        position: relative;
+        z-index: 101;
+      }
+      .data-banner strong {
+        color: #fff;
+        font-weight: 700;
+      }
+      .data-banner i {
+        margin-right: 6px;
+        color: #ffaa33;
+      }
+
+      /* Header */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(8, 8, 16, 0.94);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+      }
+      .brand-icon {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--accent), #b8860b);
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.78rem;
+        color: #000;
+        font-weight: 800;
+      }
+      .pair-tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--bg2);
+        border-radius: 8px;
+        padding: 3px;
+      }
+      .pair-tab {
+        padding: 5px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        transition: all 0.2s;
+        border: none;
+        background: none;
+        color: var(--tx2);
+      }
+      .pair-tab.active {
+        background: var(--accent);
+        color: #000;
+      }
+      .pair-tab:hover:not(.active) {
+        color: var(--tx1);
+        background: var(--bg3);
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .auto-refresh {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        color: var(--tx3);
+        cursor: pointer;
+        user-select: none;
+      }
+      .auto-refresh input {
+        display: none;
+      }
+      .toggle-track {
+        width: 30px;
+        height: 16px;
+        background: var(--bg4);
+        border-radius: 8px;
+        position: relative;
+        transition: background 0.2s;
+      }
+      .toggle-track::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 12px;
+        height: 12px;
+        background: var(--tx3);
+        border-radius: 50%;
+        transition: all 0.2s;
+      }
+      .auto-refresh input:checked + .toggle-track {
+        background: var(--accent-dim);
+      }
+      .auto-refresh input:checked + .toggle-track::after {
+        left: 16px;
+        background: var(--accent);
+      }
+      .refresh-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--tx2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+      }
+      .refresh-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-glow);
+      }
+      .refresh-btn.spinning i {
+        animation: spin 0.6s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .clock {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--tx3);
+        min-width: 66px;
+        text-align: right;
+      }
+
+      /* Main */
+      .main-wrap {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 20px 24px 60px;
+      }
+
+      /* Signal Hero */
+      .signal-hero {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      @media (max-width: 860px) {
+        .signal-hero {
+          grid-template-columns: 1fr;
+        }
+      }
+      .gauge-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .gauge-canvas {
+        width: 260px;
+        height: 150px;
+      }
+      .gauge-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--tx3);
+        margin-top: 2px;
+      }
+      .signal-big {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+      }
+      .confidence-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        font-size: 0.76rem;
+        color: var(--tx2);
+      }
+      .conf-bar {
+        width: 90px;
+        height: 5px;
+        background: var(--bg4);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .conf-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+      }
+      .info-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .price-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+      }
+      .price-main {
+        font-family: var(--font-mono);
+        font-size: 1.9rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .price-change {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 2px;
+      }
+      .ohlc-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .ohlc-item {
+        font-size: 0.7rem;
+        color: var(--tx3);
+      }
+      .ohlc-item span {
+        display: block;
+        font-family: var(--font-mono);
+        color: var(--tx2);
+        font-size: 0.8rem;
+        margin-top: 1px;
+      }
+      .summary-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        flex: 1;
+      }
+      .summary-card h3 {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .summary-text {
+        font-size: 0.82rem;
+        color: var(--tx2);
+        line-height: 1.7;
+      }
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .stat-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        text-align: center;
+      }
+      .stat-label {
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--tx3);
+        margin-bottom: 3px;
+      }
+      .stat-value {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      /* Timeframe Bar */
+      .tf-bar {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 18px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tf-btn {
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--tx2);
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+        font-family: var(--font-mono);
+      }
+      .tf-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+      }
+      .tf-btn:hover:not(.active) {
+        border-color: var(--accent-dim);
+        color: var(--tx1);
+      }
+      .tf-bar-label {
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--tx3);
+        display: flex;
+        align-items: center;
+        margin-right: 6px;
+        white-space: nowrap;
+      }
+
+      /* Chart */
+      .chart-section {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+      .chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chart-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--tx2);
+      }
+      .chart-overlays {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .overlay-btn {
+        padding: 3px 9px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background: none;
+        color: var(--tx3);
+        font-size: 0.66rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: var(--font-mono);
+      }
+      .overlay-btn.active {
+        border-color: var(--accent-dim);
+        color: var(--accent);
+        background: var(--accent-glow);
+      }
+      .overlay-btn:hover:not(.active) {
+        color: var(--tx2);
+      }
+      .chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 380px;
+      }
+      @media (max-width: 640px) {
+        .chart-wrap {
+          height: 260px;
+        }
+      }
+      .chart-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: crosshair;
+      }
+      .chart-tooltip {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(14, 14, 24, 0.94);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.72rem;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 10;
+        min-width: 150px;
+      }
+      .chart-tooltip.visible {
+        opacity: 1;
+      }
+      .chart-tooltip .tt-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+      }
+      .chart-tooltip .tt-label {
+        color: var(--tx3);
+      }
+      .chart-tooltip .tt-val {
+        font-family: var(--font-mono);
+        color: var(--tx2);
+      }
+
+      /* Section Headers */
+      .section-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .section-head h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .section-head .line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .section-head .count {
+        font-size: 0.7rem;
+        color: var(--tx3);
+        font-family: var(--font-mono);
+      }
+
+      /* Quick Table */
+      .table-section {
+        margin-bottom: 24px;
+        overflow-x: auto;
+      }
+      .sig-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+      }
+      .sig-table thead {
+        position: sticky;
+        top: 0;
+      }
+      .sig-table th {
+        padding: 9px 12px;
+        text-align: left;
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--tx3);
+        font-weight: 600;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+      }
+      .sig-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+        color: var(--tx2);
+        vertical-align: middle;
+      }
+      .sig-table tr:hover td {
+        background: var(--bg3);
+      }
+      .sig-table .ind-name {
+        font-weight: 600;
+        color: var(--tx1);
+        font-size: 0.8rem;
+      }
+      .sig-table .ind-val {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .badge-buy {
+        background: var(--buy-dim);
+        color: var(--buy);
+      }
+      .badge-sell {
+        background: var(--sell-dim);
+        color: var(--sell);
+      }
+      .badge-neut {
+        background: var(--neut-dim);
+        color: var(--neut);
+      }
+      .cat-badge {
+        font-size: 0.64rem;
+        padding: 2px 7px;
+        border-radius: 3px;
+        background: var(--bg4);
+        color: var(--tx3);
+        font-weight: 500;
+      }
+      .strength-bar {
+        width: 56px;
+        height: 4px;
+        background: var(--bg4);
+        border-radius: 2px;
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 5px;
+      }
+      .strength-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.4s;
+      }
+
+      /* Indicator Cards */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 1024px) {
+        .cards-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 640px) {
+        .cards-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .ind-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .ind-card:hover {
+        border-color: var(--bg4);
+        transform: translateY(-1px);
+      }
+      .ind-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .ind-card-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .ind-card-cat {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--tx3);
+        background: var(--bg4);
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+      .ind-card-val {
+        font-family: var(--font-mono);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .ind-card-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+      }
+      .ind-card-detail {
+        font-size: 0.7rem;
+        color: var(--tx3);
+        flex: 1;
+        margin-right: 8px;
+        line-height: 1.5;
+      }
+
+      /* History */
+      .history-section {
+        margin-bottom: 24px;
+      }
+      .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+      .history-table th {
+        padding: 9px 12px;
+        text-align: left;
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--tx3);
+        font-weight: 600;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+      }
+      .history-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+        color: var(--tx2);
+      }
+      .history-table .mono {
+        font-family: var(--font-mono);
+      }
+
+      /* Footer */
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 24px;
+        text-align: center;
+        color: var(--tx3);
+        font-size: 0.7rem;
+        line-height: 1.8;
+        max-width: 1360px;
+        margin: 0 auto;
+      }
+      .site-footer strong {
+        color: var(--tx2);
+      }
+
+      /* Loading overlay */
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: rgba(8, 8, 16, 0.88);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        transition: opacity 0.3s;
+      }
+      .loading-overlay.hidden {
+        display: none;
+      }
+      .loader {
+        width: 36px;
+        height: 36px;
+        border: 3px solid var(--bg4);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      .loading-text {
+        font-size: 0.8rem;
+        color: var(--tx3);
+        letter-spacing: 0.05em;
+      }
+
+      /* Error state */
+      .error-banner {
+        background: rgba(255, 71, 87, 0.12);
+        border: 1px solid rgba(255, 71, 87, 0.3);
+        border-radius: var(--radius);
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        color: var(--sell);
+        font-size: 0.82rem;
+        display: none;
+      }
+      .error-banner i {
+        margin-right: 8px;
+      }
+
+      /* Animations */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-up {
+        animation: fadeUp 0.4s ease both;
+      }
+      @keyframes pulse-buy {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 var(--buy-glow);
+        }
+        50% {
+          box-shadow: 0 0 14px 3px var(--buy-glow);
+        }
+      }
+      @keyframes pulse-sell {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 var(--sell-glow);
+        }
+        50% {
+          box-shadow: 0 0 14px 3px var(--sell-glow);
+        }
+      }
+      .pulse-buy {
+        animation: pulse-buy 2s ease infinite;
+      }
+      .pulse-sell {
+        animation: pulse-sell 2s ease infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .fade-up,
+        .pulse-buy,
+        .pulse-sell {
+          animation: none !important;
+        }
+        .refresh-btn.spinning i {
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Data Source Banner -->
+    <div class="data-banner" role="alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      <strong>SIMULATED DATA</strong> — This tool uses locally generated sample
+      data for demonstration. It does NOT connect to any exchange, market feed,
+      or API. Signals are computed from synthetic prices only. Do NOT use for
+      real trading decisions.
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loader"></div>
+      <div class="loading-text">Analyzing market data...</div>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" id="errorBanner">
+      <i class="fas fa-exclamation-circle"></i><span id="errorText"></span>
+    </div>
+
+    <!-- Header -->
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand-icon">PS</div>
+        <span>ProSignal</span>
+      </div>
+      <div class="pair-tabs" id="pairTabs" role="tablist">
+        <button
+          class="pair-tab active"
+          data-pair="BTCUSD"
+          role="tab"
+          aria-selected="true"
+        >
+          BTCUSD
+        </button>
+        <button
+          class="pair-tab"
+          data-pair="ETHUSD"
+          role="tab"
+          aria-selected="false"
+        >
+          ETHUSD
+        </button>
+      </div>
+      <div class="header-right">
+        <label class="auto-refresh" title="Auto-refresh every 30s">
+          <input type="checkbox" id="autoRefresh" checked />
+          <span class="toggle-track"></span>
+          <span>AUTO</span>
+        </label>
+        <button
+          class="refresh-btn"
+          id="refreshBtn"
+          title="Refresh now"
+          aria-label="Refresh data"
+        >
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main-wrap">
+      <section class="signal-hero fade-up" aria-label="Signal overview">
+        <div class="gauge-box" id="gaugeBox">
+          <canvas
+            class="gauge-canvas"
+            id="gaugeCanvas"
+            width="520"
+            height="300"
+          ></canvas>
+          <div class="gauge-label">Overall Signal</div>
+          <div class="signal-big" id="signalBig">--</div>
+          <div class="confidence-row">
+            <span>Confidence</span>
+            <div class="conf-bar">
+              <div class="conf-fill" id="confFill"></div>
+            </div>
+            <span class="mono" id="confText">--%</span>
+          </div>
+        </div>
+        <div class="info-panel">
+          <div class="price-card">
+            <div class="price-main" id="priceMain">--</div>
+            <div class="price-change" id="priceChange">--</div>
+            <div class="ohlc-row">
+              <div class="ohlc-item">Open<span id="ohlcO">--</span></div>
+              <div class="ohlc-item">High<span id="ohlcH">--</span></div>
+              <div class="ohlc-item">Low<span id="ohlcL">--</span></div>
+              <div class="ohlc-item">Close<span id="ohlcC">--</span></div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <h3>
+              <i class="fas fa-brain" style="margin-right: 6px"></i>Technical
+              Summary
+            </h3>
+            <div class="summary-text" id="summaryText">Loading analysis...</div>
+          </div>
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-label">Buy Signals</div>
+              <div class="stat-value" id="buyCount" style="color: var(--buy)">
+                --
+              </div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Sell Signals</div>
+              <div class="stat-value" id="sellCount" style="color: var(--sell)">
+                --
+              </div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Neutral</div>
+              <div class="stat-value" id="neutCount" style="color: var(--neut)">
+                --
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div
+        class="tf-bar fade-up"
+        role="tablist"
+        aria-label="Timeframe selection"
+      >
+        <span class="tf-bar-label"
+          ><i class="fas fa-clock" style="margin-right: 4px"></i>Timeframe</span
+        >
+        <button class="tf-btn" data-tf="1m" role="tab">1m</button>
+        <button class="tf-btn" data-tf="5m" role="tab">5m</button>
+        <button class="tf-btn" data-tf="15m" role="tab">15m</button>
+        <button class="tf-btn" data-tf="30m" role="tab">30m</button>
+        <button
+          class="tf-btn active"
+          data-tf="1H"
+          role="tab"
+          aria-selected="true"
+        >
+          1H
+        </button>
+        <button class="tf-btn" data-tf="4H" role="tab">4H</button>
+        <button class="tf-btn" data-tf="1D" role="tab">1D</button>
+        <button class="tf-btn" data-tf="1W" role="tab">1W</button>
+      </div>
+
+      <section class="chart-section fade-up" aria-label="Price chart">
+        <div class="chart-header">
+          <div class="chart-title" id="chartTitle">BTCUSD — 1H</div>
+          <div class="chart-overlays" id="overlayBtns">
+            <button class="overlay-btn active" data-ov="sma20">SMA 20</button>
+            <button class="overlay-btn active" data-ov="sma50">SMA 50</button>
+            <button class="overlay-btn" data-ov="ema12">EMA 12</button>
+            <button class="overlay-btn" data-ov="ema26">EMA 26</button>
+            <button class="overlay-btn" data-ov="bb">Bollinger</button>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas class="chart-canvas" id="chartCanvas"></canvas>
+          <div class="chart-tooltip" id="chartTooltip">
+            <div class="tt-row">
+              <span class="tt-label">Time</span
+              ><span class="tt-val" id="ttTime">--</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-label">O</span
+              ><span class="tt-val" id="ttO">--</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-label">H</span
+              ><span class="tt-val" id="ttH">--</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-label">L</span
+              ><span class="tt-val" id="ttL">--</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-label">C</span
+              ><span class="tt-val" id="ttC">--</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-label">Vol</span
+              ><span class="tt-val" id="ttV">--</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-section fade-up" aria-label="Signal summary table">
+        <div class="section-head">
+          <h2>All Indicators at a Glance</h2>
+          <div class="line"></div>
+          <span class="count" id="tableCount">--</span>
+        </div>
+        <table class="sig-table">
+          <thead>
+            <tr>
+              <th>Indicator</th>
+              <th>Value</th>
+              <th>Signal</th>
+              <th>Strength</th>
+              <th>Category</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody id="sigTableBody"></tbody>
+        </table>
+      </section>
+
+      <section aria-label="Detailed indicator analysis">
+        <div class="section-head">
+          <h2>Detailed Analysis</h2>
+          <div class="line"></div>
+        </div>
+        <div class="cards-grid" id="cardsGrid"></div>
+      </section>
+
+      <section class="history-section fade-up" aria-label="Signal history">
+        <div class="section-head">
+          <h2>Signal History</h2>
+          <div class="line"></div>
+          <span class="count" id="histCount">0 records</span>
+        </div>
+        <div style="overflow-x: auto">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Pair</th>
+                <th>TF</th>
+                <th>Signal</th>
+                <th>Strength</th>
+                <th>Confidence</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <strong>Disclaimer:</strong> ProSignal is a technical analysis
+      demonstration tool. It does NOT constitute financial advice, investment
+      recommendations, or solicitation to buy or sell any assets. Trading
+      involves substantial risk of loss. Past performance does not guarantee
+      future results. Always consult a qualified financial advisor.<br /><br />
+      <strong>Data Source:</strong> All price data is generated locally by a
+      deterministic pseudo-random algorithm (seeded LCG). There is NO connection
+      to Binance, Coinbase, TradingView, or any other data provider. No data
+      leaves your browser. The signals shown are mathematically correct formulas
+      applied to synthetic data — they do not reflect real market conditions.
+    </footer>
+
+    <script>
+      /* ================================================================
+   UTILITIES
+   ================================================================ */
+      function seededRandom(seed) {
+        var s = Math.abs(seed | 0) || 1;
+        return function () {
+          s = (s * 1664525 + 1013904223) & 0x7fffffff;
+          return s / 0x7fffffff;
+        };
+      }
+
+      function fmtPrice(v, pair) {
+        if (pair === "BTCUSD")
+          return (
+            "$" +
+            v.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          );
+        return "$" + v.toFixed(2);
+      }
+      function fmtVol(v) {
+        return v >= 1e6
+          ? (v / 1e6).toFixed(2) + "M"
+          : v >= 1e3
+            ? (v / 1e3).toFixed(1) + "K"
+            : v.toFixed(0);
+      }
+      function fmtPct(v) {
+        return (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
+      }
+      function clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, v));
+      }
+
+      /* ================================================================
+   DATA GENERATION — 100% LOCAL, NO EXTERNAL SOURCE
+   ================================================================ */
+      function generateOHLCV(pair, tf) {
+        var base = pair === "BTCUSD" ? 104200 : 2520;
+        var volMult =
+          {
+            "1m": 0.08,
+            "5m": 0.18,
+            "15m": 0.35,
+            "30m": 0.5,
+            "1H": 0.75,
+            "4H": 1.4,
+            "1D": 2.8,
+            "1W": 5.5,
+          }[tf] || 0.75;
+        var vol = base * volMult * 0.001;
+        // Seed changes every minute so data evolves over time
+        var seed =
+          Math.floor(Date.now() / 60000) * (pair === "BTCUSD" ? 7919 : 8273) +
+          ({
+            "1m": 2,
+            "5m": 3,
+            "15m": 5,
+            "30m": 7,
+            "1H": 11,
+            "4H": 13,
+            "1D": 17,
+            "1W": 19,
+          }[tf] || 11);
+        var rng = seededRandom(seed);
+        var N = 260;
+        var data = [];
+        var price = base * (0.97 + rng() * 0.06);
+        var tfMs =
+          {
+            "1m": 60000,
+            "5m": 300000,
+            "15m": 900000,
+            "30m": 1800000,
+            "1H": 3600000,
+            "4H": 14400000,
+            "1D": 86400000,
+            "1W": 604800000,
+          }[tf] || 3600000;
+        var now = Date.now();
+
+        for (var i = 0; i < N; i++) {
+          var trend =
+            Math.sin(i / 35) * vol * 0.5 + Math.sin(i / 80) * vol * 0.3;
+          var reversion = (base - price) * 0.002;
+          var noise = (rng() - 0.5) * vol * 2;
+          var vClust = 0.6 + 0.8 * (0.5 + 0.5 * Math.sin(i / 12));
+          var change = (trend + reversion + noise) * vClust;
+          var open = price;
+          var close = price + change;
+          var range = Math.abs(change) + rng() * vol * 0.8;
+          var high = Math.max(open, close) + rng() * range * 0.6;
+          var low = Math.min(open, close) - rng() * range * 0.6;
+          var bVol = (800 + rng() * 6000) * (pair === "BTCUSD" ? 1 : 8);
+          var volume = bVol * (1 + Math.abs(change / vol) * 1.5);
+          data.push({
+            time: now - (N - i) * tfMs,
+            open: open,
+            high: high,
+            low: low,
+            close: close,
+            volume: volume,
+          });
+          price = close;
+        }
+        return data;
+      }
+
+      /* ================================================================
+   TECHNICAL INDICATORS — Standard mathematical formulas
+   ================================================================ */
+      function calcSMA(d, p) {
+        var r = [];
+        for (var i = 0; i < d.length; i++) {
+          if (i < p - 1) {
+            r.push(null);
+            continue;
+          }
+          var s = 0;
+          for (var j = i - p + 1; j <= i; j++) s += d[j];
+          r.push(s / p);
+        }
+        return r;
+      }
+
+      function calcEMA(d, p) {
+        var r = [],
+          k = 2 / (p + 1),
+          prev = null;
+        for (var i = 0; i < d.length; i++) {
+          if (i < p - 1) {
+            r.push(null);
+            continue;
+          }
+          if (prev === null) {
+            var s = 0;
+            for (var j = i - p + 1; j <= i; j++) s += d[j];
+            prev = s / p;
+          } else {
+            prev = d[i] * k + prev * (1 - k);
+          }
+          r.push(prev);
+        }
+        return r;
+      }
+
+      function calcRSI(d, p) {
+        var r = [],
+          gSum = 0,
+          lSum = 0;
+        for (var i = 0; i < d.length; i++) {
+          if (i === 0) {
+            r.push(null);
+            continue;
+          }
+          var ch = d[i] - d[i - 1];
+          if (i <= p) {
+            if (ch > 0) gSum += ch;
+            else lSum -= ch;
+            if (i < p) {
+              r.push(null);
+              continue;
+            }
+            var ag = gSum / p,
+              al = lSum / p;
+            r.push(al === 0 ? 100 : 100 - 100 / (1 + ag / al));
+          } else {
+            var cg = ch > 0 ? ch : 0,
+              cl_ = ch < 0 ? -ch : 0;
+            ag = (gSum * (p - 1) + cg) / p;
+            al = (lSum * (p - 1) + cl_) / p;
+            gSum = ag;
+            lSum = al;
+            r.push(al === 0 ? 100 : 100 - 100 / (1 + ag / al));
+          }
+        }
+        return r;
+      }
+
+      function calcMACD(d) {
+        var ef = calcEMA(d, 12),
+          es = calcEMA(d, 26);
+        var ml = [];
+        for (var i = 0; i < d.length; i++) {
+          ml.push(ef[i] !== null && es[i] !== null ? ef[i] - es[i] : null);
+        }
+        var valid = [];
+        for (var i = 0; i < ml.length; i++) {
+          if (ml[i] !== null) valid.push(ml[i]);
+        }
+        var sl = calcEMA(valid, 9);
+        var off = ml.length - sl.length;
+        var sig = [];
+        for (var i = 0; i < off; i++) sig.push(null);
+        for (var i = 0; i < sl.length; i++) sig.push(sl[i]);
+        var hist = [];
+        for (var i = 0; i < ml.length; i++) {
+          hist.push(ml[i] !== null && sig[i] !== null ? ml[i] - sig[i] : null);
+        }
+        return { macd: ml, signal: sig, histogram: hist };
+      }
+
+      function calcStoch(hi, lo, cl, kp, ks, dp) {
+        var rawK = [];
+        for (var i = 0; i < cl.length; i++) {
+          if (i < kp - 1) {
+            rawK.push(null);
+            continue;
+          }
+          var hh = -Infinity,
+            ll = Infinity;
+          for (var j = i - kp + 1; j <= i; j++) {
+            hh = Math.max(hh, hi[j]);
+            ll = Math.min(ll, lo[j]);
+          }
+          var rng = hh - ll;
+          rawK.push(rng === 0 ? 50 : ((cl[i] - ll) / rng) * 100);
+        }
+        var validK = [];
+        for (var i = 0; i < rawK.length; i++) {
+          if (rawK[i] !== null) validK.push(rawK[i]);
+        }
+        var smoothK = calcSMA(validK, ks);
+        var kOff = rawK.length - smoothK.length;
+        var k = [];
+        for (var i = 0; i < kOff; i++) k.push(null);
+        for (var i = 0; i < smoothK.length; i++) k.push(smoothK[i]);
+
+        var validK2 = [];
+        for (var i = 0; i < smoothK.length; i++) {
+          if (smoothK[i] !== null) validK2.push(smoothK[i]);
+        }
+        var smoothD = calcSMA(validK2, dp);
+        var dOff = k.length - smoothD.length;
+        var d = [];
+        for (var i = 0; i < dOff; i++) d.push(null);
+        for (var i = 0; i < smoothD.length; i++) d.push(smoothD[i]);
+        return { k: k, d: d };
+      }
+
+      function calcBB(d, p, m) {
+        var mid = calcSMA(d, p),
+          up = [],
+          lo = [];
+        for (var i = 0; i < d.length; i++) {
+          if (mid[i] === null) {
+            up.push(null);
+            lo.push(null);
+            continue;
+          }
+          var sq = 0;
+          for (var j = i - p + 1; j <= i; j++)
+            sq += (d[j] - mid[i]) * (d[j] - mid[i]);
+          var sd = Math.sqrt(sq / p);
+          up.push(mid[i] + m * sd);
+          lo.push(mid[i] - m * sd);
+        }
+        return { upper: up, middle: mid, lower: lo };
+      }
+
+      function calcADX(hi, lo, cl, p) {
+        var n = cl.length;
+        var pDM = [],
+          mDM = [],
+          tr = [];
+        for (var i = 0; i < n; i++) {
+          if (i === 0) {
+            pDM.push(0);
+            mDM.push(0);
+            tr.push(hi[0] - lo[0]);
+            continue;
+          }
+          var up = hi[i] - hi[i - 1],
+            dn = lo[i - 1] - lo[i];
+          pDM.push(up > dn && up > 0 ? up : 0);
+          mDM.push(dn > up && dn > 0 ? dn : 0);
+          tr.push(
+            Math.max(
+              hi[i] - lo[i],
+              Math.abs(hi[i] - cl[i - 1]),
+              Math.abs(lo[i] - cl[i - 1]),
+            ),
+          );
+        }
+        var sp = new Array(n).fill(null),
+          sm = new Array(n).fill(null),
+          st = new Array(n).fill(null);
+        var sp0 = 0,
+          sm0 = 0,
+          st0 = 0;
+        for (var i = 0; i < p; i++) {
+          sp0 += pDM[i];
+          sm0 += mDM[i];
+          st0 += tr[i];
+        }
+        sp[p - 1] = sp0;
+        sm[p - 1] = sm0;
+        st[p - 1] = st0;
+        for (var i = p; i < n; i++) {
+          sp[i] = sp[i - 1] - sp[i - 1] / p + pDM[i];
+          sm[i] = sm[i - 1] - sm[i - 1] / p + mDM[i];
+          st[i] = st[i - 1] - st[i - 1] / p + tr[i];
+        }
+        var pdi = new Array(n).fill(null),
+          mdi = new Array(n).fill(null),
+          dx = new Array(n).fill(null);
+        for (var i = 0; i < n; i++) {
+          if (st[i] === null || st[i] === 0) continue;
+          pdi[i] = (100 * sp[i]) / st[i];
+          mdi[i] = (100 * sm[i]) / st[i];
+          var sum = pdi[i] + mdi[i];
+          dx[i] = sum === 0 ? 0 : (100 * Math.abs(pdi[i] - mdi[i])) / sum;
+        }
+        var adxV = new Array(n).fill(null);
+        var start = p * 2 - 1;
+        if (start < n && dx[start] !== null) {
+          var s = 0;
+          for (var i = p; i <= start; i++) {
+            if (dx[i] !== null) s += dx[i];
+          }
+          adxV[start] = s / p;
+          for (var i = start + 1; i < n; i++) {
+            if (dx[i] !== null) adxV[i] = (adxV[i - 1] * (p - 1) + dx[i]) / p;
+          }
+        }
+        return { adx: adxV, pdi: pdi, mdi: mdi };
+      }
+
+      function calcCCI(hi, lo, cl, p) {
+        var tp = [];
+        for (var i = 0; i < cl.length; i++)
+          tp.push((hi[i] + lo[i] + cl[i]) / 3);
+        var sma = calcSMA(tp, p);
+        var r = [];
+        for (var i = 0; i < tp.length; i++) {
+          if (sma[i] === null) {
+            r.push(null);
+            continue;
+          }
+          var md = 0;
+          for (var j = i - p + 1; j <= i; j++) md += Math.abs(tp[j] - sma[i]);
+          md /= p;
+          r.push(md === 0 ? 0 : (tp[i] - sma[i]) / (0.015 * md));
+        }
+        return r;
+      }
+
+      function calcWilliamsR(hi, lo, cl, p) {
+        var r = [];
+        for (var i = 0; i < cl.length; i++) {
+          if (i < p - 1) {
+            r.push(null);
+            continue;
+          }
+          var hh = -Infinity,
+            ll = Infinity;
+          for (var j = i - p + 1; j <= i; j++) {
+            hh = Math.max(hh, hi[j]);
+            ll = Math.min(ll, lo[j]);
+          }
+          var rng = hh - ll;
+          r.push(rng === 0 ? -50 : ((hh - cl[i]) / rng) * -100);
+        }
+        return r;
+      }
+
+      function calcROC(d, p) {
+        var r = [];
+        for (var i = 0; i < d.length; i++) {
+          if (i < p) {
+            r.push(null);
+            continue;
+          }
+          r.push(((d[i] - d[i - p]) / d[i - p]) * 100);
+        }
+        return r;
+      }
+
+      function calcATR(hi, lo, cl, p) {
+        var tr = [hi[0] - lo[0]];
+        for (var i = 1; i < cl.length; i++) {
+          tr.push(
+            Math.max(
+              hi[i] - lo[i],
+              Math.abs(hi[i] - cl[i - 1]),
+              Math.abs(lo[i] - cl[i - 1]),
+            ),
+          );
+        }
+        return calcSMA(tr, p);
+      }
+
+      function calcOBV(cl, vol) {
+        var r = [0];
+        for (var i = 1; i < cl.length; i++) {
+          if (cl[i] > cl[i - 1]) r.push(r[i - 1] + vol[i]);
+          else if (cl[i] < cl[i - 1]) r.push(r[i - 1] - vol[i]);
+          else r.push(r[i - 1]);
+        }
+        return r;
+      }
+
+      function calcPivots(h, l, c) {
+        var pp = (h + l + c) / 3;
+        return {
+          pp: pp,
+          r1: 2 * pp - l,
+          s1: 2 * pp - h,
+          r2: pp + (h - l),
+          s2: pp - (h - l),
+        };
+      }
+
+      /* Ichimoku — cleaned up, no nested IIFEs */
+      function calcIchimoku(hi, lo, cl) {
+        var n = cl.length;
+        var tenkan = [],
+          kijun = [],
+          spanA = [],
+          spanB = [];
+
+        function hlMid(period, idx) {
+          var hh = -Infinity,
+            ll = Infinity;
+          var start = Math.max(0, idx - period + 1);
+          for (var j = start; j <= idx; j++) {
+            hh = Math.max(hh, hi[j]);
+            ll = Math.min(ll, lo[j]);
+          }
+          return (hh + ll) / 2;
+        }
+
+        for (var i = 0; i < n; i++) {
+          tenkan.push(i < 8 ? null : hlMid(9, i));
+          kijun.push(i < 25 ? null : hlMid(26, i));
+
+          var ci = i - 26; // cloud displaced back 26 periods
+          if (ci >= 0 && tenkan[ci] !== null && kijun[ci] !== null) {
+            spanA.push((tenkan[ci] + kijun[ci]) / 2);
+          } else {
+            spanA.push(null);
+          }
+
+          if (ci >= 51) {
+            spanB.push(hlMid(52, ci));
+          } else {
+            spanB.push(null);
+          }
+        }
+        return { tenkan: tenkan, kijun: kijun, spanA: spanA, spanB: spanB };
+      }
+
+      /* ================================================================
+   SIGNAL ENGINE
+   ================================================================ */
+      function lastVal(arr) {
+        for (var i = arr.length - 1; i >= 0; i--) {
+          if (arr[i] !== null && arr[i] !== undefined) return arr[i];
+        }
+        return null;
+      }
+
+      function analyzeAll(data, pair) {
+        var cl = [],
+          hi = [],
+          lo = [],
+          vol = [];
+        for (var i = 0; i < data.length; i++) {
+          cl.push(data[i].close);
+          hi.push(data[i].high);
+          lo.push(data[i].low);
+          vol.push(data[i].volume);
+        }
+        var n = data.length;
+        var lc = data[n - 1];
+        var indicators = [];
+
+        // --- TREND ---
+        // 1. SMA Alignment
+        try {
+          var s20 = lastVal(calcSMA(cl, 20)),
+            s50 = lastVal(calcSMA(cl, 50)),
+            s200 = lastVal(calcSMA(cl, 200));
+          if (s20 && s50 && s200) {
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (lc.close > s20 && s20 > s50 && s50 > s200) {
+              sig = 1;
+              str = 1;
+              det = "Perfect bullish alignment";
+            } else if (lc.close < s20 && s20 < s50 && s50 < s200) {
+              sig = -1;
+              str = 1;
+              det = "Perfect bearish alignment";
+            } else if (lc.close > s20 && s20 > s50) {
+              sig = 1;
+              str = 0.6;
+              det = "Partial bullish (above SMA20/50)";
+            } else if (lc.close < s20 && s20 < s50) {
+              sig = -1;
+              str = 0.6;
+              det = "Partial bearish (below SMA20/50)";
+            } else if (lc.close > s200) {
+              sig = 0;
+              str = 0.2;
+              det = "Above SMA200 but mixed short-term";
+            } else if (lc.close < s200) {
+              sig = 0;
+              str = 0.2;
+              det = "Below SMA200 but mixed short-term";
+            } else {
+              det = "No clear alignment";
+            }
+            indicators.push({
+              name: "SMA Alignment",
+              category: "Trend",
+              displayValue:
+                "20:" +
+                s20.toFixed(0) +
+                " 50:" +
+                s50.toFixed(0) +
+                " 200:" +
+                s200.toFixed(0),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.06,
+            });
+          }
+        } catch (e) {
+          console.warn("SMA Alignment error:", e);
+        }
+
+        // 2. EMA Cross
+        try {
+          var e12 = lastVal(calcEMA(cl, 12)),
+            e26 = lastVal(calcEMA(cl, 26));
+          if (e12 !== null && e26 !== null) {
+            var diff = ((e12 - e26) / e26) * 100;
+            var sig = e12 > e26 ? 1 : -1,
+              str = clamp(Math.abs(diff) * 20, 0.1, 1);
+            indicators.push({
+              name: "EMA Cross",
+              category: "Trend",
+              displayValue: diff.toFixed(3) + "%",
+              signal: sig,
+              strength: str,
+              detail:
+                "EMA12 " +
+                (e12 > e26 ? "above" : "below") +
+                " EMA26 by " +
+                Math.abs(diff).toFixed(3) +
+                "%",
+              weight: 0.06,
+            });
+          }
+        } catch (e) {
+          console.warn("EMA Cross error:", e);
+        }
+
+        // 3. MACD
+        try {
+          var md = calcMACD(cl);
+          var mLine = lastVal(md.macd),
+            mSig = lastVal(md.signal),
+            mHist = lastVal(md.histogram);
+          if (mLine !== null && mSig !== null && mHist !== null) {
+            var sig = mHist > 0 ? 1 : mHist < 0 ? -1 : 0;
+            var scale = pair === "BTCUSD" ? 1 : 0.01;
+            var str = clamp((Math.abs(mHist) / scale) * 5, 0.1, 1);
+            indicators.push({
+              name: "MACD",
+              category: "Trend",
+              displayValue: mHist.toFixed(pair === "BTCUSD" ? 2 : 4),
+              signal: sig,
+              strength: str,
+              detail:
+                "MACD " +
+                (mLine > mSig ? "above" : "below") +
+                " signal, hist " +
+                (mHist > 0 ? "positive" : "negative"),
+              weight: 0.06,
+            });
+          }
+        } catch (e) {
+          console.warn("MACD error:", e);
+        }
+
+        // 4. ADX
+        try {
+          var ad = calcADX(hi, lo, cl, 14);
+          var adxV = lastVal(ad.adx),
+            pdiV = lastVal(ad.pdi),
+            mdiV = lastVal(ad.mdi);
+          if (adxV !== null && pdiV !== null && mdiV !== null) {
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (adxV > 25) {
+              sig = pdiV > mdiV ? 1 : -1;
+              str = clamp((adxV - 25) / 25, 0.1, 1);
+              det =
+                "Strong trend (ADX " +
+                adxV.toFixed(1) +
+                "), " +
+                (pdiV > mdiV ? "+DI dominant" : "-DI dominant");
+            } else {
+              sig = 0;
+              str = 0.1;
+              det =
+                "Weak trend (ADX " + adxV.toFixed(1) + "), no directional bias";
+            }
+            indicators.push({
+              name: "ADX",
+              category: "Trend",
+              displayValue: adxV.toFixed(1),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.06,
+            });
+          }
+        } catch (e) {
+          console.warn("ADX error:", e);
+        }
+
+        // 5. Ichimoku
+        try {
+          var ichi = calcIchimoku(hi, lo, cl);
+          var iA = lastVal(ichi.spanA),
+            iB = lastVal(ichi.spanB);
+          if (iA !== null && iB !== null) {
+            var cTop = Math.max(iA, iB),
+              cBot = Math.min(iA, iB);
+            var cRange = Math.max(cTop - cBot, 0.01);
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (lc.close > cTop) {
+              sig = 1;
+              str = clamp(((lc.close - cTop) / cRange) * 0.5, 0.2, 1);
+              det = "Price above cloud — bullish";
+            } else if (lc.close < cBot) {
+              sig = -1;
+              str = clamp(((cBot - lc.close) / cRange) * 0.5, 0.2, 1);
+              det = "Price below cloud — bearish";
+            } else {
+              sig = 0;
+              str = 0.1;
+              det = "Price inside cloud — neutral";
+            }
+            indicators.push({
+              name: "Ichimoku Cloud",
+              category: "Trend",
+              displayValue:
+                "Top:" + fmtPrice(cTop, pair) + " Bot:" + fmtPrice(cBot, pair),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.06,
+            });
+          }
+        } catch (e) {
+          console.warn("Ichimoku error:", e);
+        }
+
+        // --- MOMENTUM ---
+        // 6. RSI
+        try {
+          var rsiV = lastVal(calcRSI(cl, 14));
+          if (rsiV !== null) {
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (rsiV < 30) {
+              sig = 1;
+              str = clamp((30 - rsiV) / 30, 0.2, 1);
+              det = "Oversold — potential reversal up";
+            } else if (rsiV > 70) {
+              sig = -1;
+              str = clamp((rsiV - 70) / 30, 0.2, 1);
+              det = "Overbought — potential reversal down";
+            } else if (rsiV < 45) {
+              det = "Leaning oversold";
+            } else if (rsiV > 55) {
+              det = "Leaning overbought";
+            } else {
+              det = "Neutral zone";
+            }
+            indicators.push({
+              name: "RSI (14)",
+              category: "Momentum",
+              displayValue: rsiV.toFixed(1),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.05,
+            });
+          }
+        } catch (e) {
+          console.warn("RSI error:", e);
+        }
+
+        // 7. Stochastic
+        try {
+          var st = calcStoch(hi, lo, cl, 14, 3, 3);
+          var stK = lastVal(st.k),
+            stD = lastVal(st.d);
+          if (stK !== null && stD !== null) {
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (stK < 20 && stD < 20) {
+              sig = 1;
+              str = clamp((20 - stK) / 20, 0.2, 1);
+              det = "Oversold zone";
+            } else if (stK > 80 && stD > 80) {
+              sig = -1;
+              str = clamp((stK - 80) / 20, 0.2, 1);
+              det = "Overbought zone";
+            } else if (stK > stD && stK < 80) {
+              sig = 1;
+              str = 0.3;
+              det = "%K above %D, bullish momentum";
+            } else if (stK < stD && stK > 20) {
+              sig = -1;
+              str = 0.3;
+              det = "%K below %D, bearish momentum";
+            } else {
+              det = "No clear signal";
+            }
+            indicators.push({
+              name: "Stochastic",
+              category: "Momentum",
+              displayValue: "%K:" + stK.toFixed(1) + " %D:" + stD.toFixed(1),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.05,
+            });
+          }
+        } catch (e) {
+          console.warn("Stochastic error:", e);
+        }
+
+        // 8. CCI
+        try {
+          var cciV = lastVal(calcCCI(hi, lo, cl, 20));
+          if (cciV !== null) {
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (cciV < -100) {
+              sig = 1;
+              str = clamp((-100 - cciV) / 200, 0.2, 1);
+              det = "Oversold territory";
+            } else if (cciV > 100) {
+              sig = -1;
+              str = clamp((cciV - 100) / 200, 0.2, 1);
+              det = "Overbought territory";
+            } else if (cciV < 0) {
+              det = "Below zero, slight bearish";
+            } else {
+              det = "Above zero, slight bullish";
+            }
+            indicators.push({
+              name: "CCI (20)",
+              category: "Momentum",
+              displayValue: cciV.toFixed(1),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.05,
+            });
+          }
+        } catch (e) {
+          console.warn("CCI error:", e);
+        }
+
+        // 9. Williams %R
+        try {
+          var wrV = lastVal(calcWilliamsR(hi, lo, cl, 14));
+          if (wrV !== null) {
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (wrV > -20) {
+              sig = -1;
+              str = clamp(((wrV + 20) / 80) * -1 + 1, 0.2, 1);
+              det = "Overbought — selling pressure";
+            } else if (wrV < -80) {
+              sig = 1;
+              str = clamp((-80 - wrV) / 20, 0.2, 1);
+              det = "Oversold — buying pressure";
+            } else {
+              det = "Neutral range";
+            }
+            indicators.push({
+              name: "Williams %R",
+              category: "Momentum",
+              displayValue: wrV.toFixed(1),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.05,
+            });
+          }
+        } catch (e) {
+          console.warn("Williams %R error:", e);
+        }
+
+        // 10. ROC
+        try {
+          var rocV = lastVal(calcROC(cl, 12));
+          if (rocV !== null) {
+            var sig = rocV > 0.1 ? 1 : rocV < -0.1 ? -1 : 0,
+              str = clamp(Math.abs(rocV) * 10, 0.05, 1);
+            indicators.push({
+              name: "ROC (12)",
+              category: "Momentum",
+              displayValue: rocV.toFixed(3) + "%",
+              signal: sig,
+              strength: str,
+              detail:
+                "Rate of change is " +
+                (rocV > 0 ? "positive" : "negative") +
+                " at " +
+                Math.abs(rocV).toFixed(3) +
+                "%",
+              weight: 0.05,
+            });
+          }
+        } catch (e) {
+          console.warn("ROC error:", e);
+        }
+
+        // --- VOLATILITY ---
+        // 11. Bollinger %B
+        try {
+          var bb = calcBB(cl, 20, 2);
+          var bbU = lastVal(bb.upper),
+            bbL = lastVal(bb.lower);
+          if (bbU !== null && bbL !== null) {
+            var range = Math.max(bbU - bbL, 0.01);
+            var pctB = (lc.close - bbL) / range;
+            var sig = 0,
+              str = 0,
+              det = "";
+            if (pctB > 1) {
+              sig = -1;
+              str = clamp((pctB - 1) * 3, 0.3, 1);
+              det = "Above upper band — overbought";
+            } else if (pctB < 0) {
+              sig = 1;
+              str = clamp(-pctB * 3, 0.3, 1);
+              det = "Below lower band — oversold";
+            } else if (pctB > 0.8) {
+              det = "Near upper band";
+            } else if (pctB < 0.2) {
+              det = "Near lower band";
+            } else {
+              det = "Within bands — normal";
+            }
+            indicators.push({
+              name: "Bollinger %B",
+              category: "Volatility",
+              displayValue: pctB.toFixed(3),
+              signal: sig,
+              strength: str,
+              detail: det,
+              weight: 0.075,
+            });
+          }
+        } catch (e) {
+          console.warn("Bollinger error:", e);
+        }
+
+        // 12. ATR
+        try {
+          var atrV = lastVal(calcATR(hi, lo, cl, 14));
+          if (atrV !== null && atrV > 0) {
+            var atrPct = (atrV / lc.close) * 100;
+            var bodySize = Math.abs(lc.close - lc.open);
+            var sig = bodySize > atrV * 1.2 ? (lc.close > lc.open ? 1 : -1) : 0;
+            var str = sig !== 0 ? clamp(bodySize / atrV - 1, 0.2, 1) : 0.05;
+            indicators.push({
+              name: "ATR (14)",
+              category: "Volatility",
+              displayValue:
+                atrV.toFixed(pair === "BTCUSD" ? 2 : 4) +
+                " (" +
+                atrPct.toFixed(2) +
+                "%)",
+              signal: sig,
+              strength: Math.abs(str),
+              detail:
+                "ATR " +
+                atrPct.toFixed(2) +
+                "% of price, " +
+                (sig !== 0 ? "significant move detected" : "normal volatility"),
+              weight: 0.075,
+            });
+          }
+        } catch (e) {
+          console.warn("ATR error:", e);
+        }
+
+        // --- VOLUME ---
+        // 13. OBV Trend
+        try {
+          var obv = calcOBV(cl, vol);
+          var obvSlice = obv.slice(-20);
+          if (obvSlice.length >= 2) {
+            var obvSlope =
+              (obvSlice[obvSlice.length - 1] - obvSlice[0]) / obvSlice.length;
+            var obvRange =
+              Math.max.apply(null, obvSlice) - Math.min.apply(null, obvSlice);
+            if (obvRange === 0) obvRange = 1;
+            var normSlope = obvSlope / obvRange;
+            var sig = normSlope > 0.05 ? 1 : normSlope < -0.05 ? -1 : 0;
+            var str = clamp(Math.abs(normSlope) * 10, 0.1, 1);
+            indicators.push({
+              name: "OBV Trend",
+              category: "Volume",
+              displayValue: fmtVol(Math.abs(obvSlice[obvSlice.length - 1])),
+              signal: sig,
+              strength: str,
+              detail:
+                "OBV trending " +
+                (normSlope > 0 ? "up" : "down") +
+                " over 20 periods",
+              weight: 0.075,
+            });
+          }
+        } catch (e) {
+          console.warn("OBV error:", e);
+        }
+
+        // 14. Volume Ratio
+        try {
+          var volSlice = vol.slice(-20);
+          var avgVol =
+            volSlice.reduce(function (a, b) {
+              return a + b;
+            }, 0) / volSlice.length;
+          var volRatio = avgVol > 0 ? vol[n - 1] / avgVol : 1;
+          var priceDir = lc.close > lc.open ? 1 : -1;
+          var vSig = volRatio > 1.5 ? priceDir : volRatio < 0.5 ? -priceDir : 0;
+          var vStr = clamp(Math.abs(volRatio - 1) * 0.8, 0.05, 1);
+          indicators.push({
+            name: "Volume Ratio",
+            category: "Volume",
+            displayValue: volRatio.toFixed(2) + "x",
+            signal: vSig,
+            strength: vStr,
+            detail:
+              "Volume at " +
+              volRatio.toFixed(1) +
+              "x average, " +
+              (volRatio > 1.3
+                ? "above normal"
+                : volRatio < 0.7
+                  ? "below normal"
+                  : "normal"),
+            weight: 0.075,
+          });
+        } catch (e) {
+          console.warn("Volume Ratio error:", e);
+        }
+
+        // --- SUPPORT/RESISTANCE ---
+        // 15. Pivot Points
+        try {
+          var pv = calcPivots(lc.high, lc.low, lc.close);
+          var pvSig = 0,
+            pvStr = 0,
+            pvDet = "";
+          if (lc.close > pv.r1) {
+            pvSig = 1;
+            pvStr = 0.8;
+            pvDet = "Above R1 — strong bullish";
+          } else if (lc.close > pv.pp) {
+            pvSig = 1;
+            pvStr = 0.35;
+            pvDet = "Between PP and R1 — mildly bullish";
+          } else if (lc.close < pv.s1) {
+            pvSig = -1;
+            pvStr = 0.8;
+            pvDet = "Below S1 — strong bearish";
+          } else if (lc.close < pv.pp) {
+            pvSig = -1;
+            pvStr = 0.35;
+            pvDet = "Between PP and S1 — mildly bearish";
+          } else {
+            pvDet = "At pivot point — indecisive";
+          }
+          indicators.push({
+            name: "Pivot Points",
+            category: "S/R",
+            displayValue: "PP:" + fmtPrice(pv.pp, pair),
+            signal: pvSig,
+            strength: pvStr,
+            detail: pvDet,
+            weight: 0.15,
+          });
+        } catch (e) {
+          console.warn("Pivot Points error:", e);
+        }
+
+        // --- AGGREGATE ---
+        var totalWeight = 0,
+          weightedSum = 0;
+        for (var i = 0; i < indicators.length; i++) {
+          totalWeight += indicators[i].weight;
+          weightedSum +=
+            indicators[i].signal *
+            indicators[i].strength *
+            indicators[i].weight;
+        }
+        var overallSignal =
+          totalWeight > 0 ? clamp(weightedSum / totalWeight, -1, 1) : 0;
+        var buys = 0,
+          sells = 0,
+          neuts = 0;
+        for (var i = 0; i < indicators.length; i++) {
+          if (indicators[i].signal > 0) buys++;
+          else if (indicators[i].signal < 0) sells++;
+          else neuts++;
+        }
+        var agreeing = Math.max(buys, sells);
+        var confidence =
+          indicators.length > 0 ? (agreeing / indicators.length) * 100 : 0;
+
+        return {
+          indicators: indicators,
+          overallSignal: overallSignal,
+          confidence: confidence,
+          buys: buys,
+          sells: sells,
+          neuts: neuts,
+        };
+      }
+
+      function generateSummary(pair, tf, analysis) {
+        var dir =
+          analysis.overallSignal > 0.1
+            ? "BULLISH"
+            : analysis.overallSignal < -0.1
+              ? "BEARISH"
+              : "NEUTRAL";
+        var agree = Math.max(analysis.buys, analysis.sells);
+        var txt =
+          pair + " exhibits a " + dir + " bias on the " + tf + " timeframe. ";
+        txt +=
+          agree +
+          " of " +
+          analysis.indicators.length +
+          " indicators confirm " +
+          (dir === "BULLISH"
+            ? "upward"
+            : dir === "BEARISH"
+              ? "downward"
+              : "sideways") +
+          " momentum at " +
+          analysis.confidence.toFixed(0) +
+          "% confidence. ";
+        var sorted = analysis.indicators.slice().sort(function (a, b) {
+          return (
+            Math.abs(b.signal * b.strength) - Math.abs(a.signal * a.strength)
+          );
+        });
+        var top3 = sorted.slice(0, 3);
+        txt +=
+          "Key drivers: " +
+          top3
+            .map(function (s) {
+              return (
+                s.name +
+                " (" +
+                (s.signal > 0
+                  ? "bullish"
+                  : s.signal < 0
+                    ? "bearish"
+                    : "neutral") +
+                ")"
+              );
+            })
+            .join(", ") +
+          ". ";
+        var divs = analysis.indicators.filter(function (ind) {
+          return (
+            ind.signal !== 0 &&
+            Math.sign(ind.signal) !== Math.sign(analysis.overallSignal) &&
+            analysis.overallSignal !== 0
+          );
+        });
+        if (divs.length > 0) {
+          txt +=
+            "Divergences: " +
+            divs
+              .map(function (d) {
+                return d.name;
+              })
+              .join(", ") +
+            (divs.length === 1 ? " disagrees" : " disagree") +
+            " with the primary signal — exercise caution.";
+        }
+        return txt;
+      }
+
+      /* ================================================================
+   CHART RENDERER
+   ================================================================ */
+      var chartState = {
+        overlays: {
+          sma20: true,
+          sma50: true,
+          ema12: false,
+          ema26: false,
+          bb: false,
+        },
+        hoverIdx: -1,
+      };
+
+      function renderChart(data, pair, overlays) {
+        var canvas = document.getElementById("chartCanvas");
+        var wrap = canvas.parentElement;
+        var dpr = window.devicePixelRatio || 1;
+        var W = wrap.clientWidth,
+          H = wrap.clientHeight;
+        if (W === 0 || H === 0) return;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + "px";
+        canvas.style.height = H + "px";
+        var ctx = canvas.getContext("2d");
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, W, H);
+
+        var showCount = Math.min(80, data.length);
+        var slice = data.slice(-showCount);
+        var volH = H * 0.18;
+        var priceH = H - volH - 30;
+        var padL = 10,
+          padR = 60,
+          padT = 10;
+        var allHi = [],
+          allLo = [];
+        for (var i = 0; i < slice.length; i++) {
+          allHi.push(slice[i].high);
+          allLo.push(slice[i].low);
+        }
+        var pMin = Math.min.apply(null, allLo),
+          pMax = Math.max.apply(null, allHi);
+        var pPad = Math.max((pMax - pMin) * 0.08, pMax * 0.0001);
+        pMin -= pPad;
+        pMax += pPad;
+        var vMax = 0;
+        for (var i = 0; i < slice.length; i++) {
+          if (slice[i].volume > vMax) vMax = slice[i].volume;
+        }
+        if (vMax === 0) vMax = 1;
+        var cW = (W - padL - padR) / showCount;
+
+        function xOf(i) {
+          return padL + i * cW + cW / 2;
+        }
+        function yOf(p) {
+          return padT + (1 - (p - pMin) / (pMax - pMin)) * priceH;
+        }
+        function vOf(v) {
+          return padT + priceH + 10 + (1 - v / vMax) * (volH - 14);
+        }
+
+        // Grid
+        ctx.strokeStyle = "#1a1a30";
+        ctx.lineWidth = 0.5;
+        for (var i = 0; i < 5; i++) {
+          var y = padT + (priceH / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(padL, y);
+          ctx.lineTo(W - padR, y);
+          ctx.stroke();
+          var pv = pMax - ((pMax - pMin) * i) / 4;
+          ctx.fillStyle = "#5c5c72";
+          ctx.font = '10px "JetBrains Mono"';
+          ctx.textAlign = "left";
+          ctx.fillText(fmtPrice(pv, pair), W - padR + 6, y + 3);
+        }
+
+        // Compute overlays from full data
+        var cl = [],
+          hi = [],
+          lo = [];
+        for (var i = 0; i < data.length; i++) {
+          cl.push(data[i].close);
+          hi.push(data[i].high);
+          lo.push(data[i].low);
+        }
+        var sma20F = calcSMA(cl, 20),
+          sma50F = calcSMA(cl, 50),
+          ema12F = calcEMA(cl, 12),
+          ema26F = calcEMA(cl, 26);
+        var bbF = calcBB(cl, 20, 2);
+        var offset = data.length - showCount;
+
+        function drawLine(arr, color, lw) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = lw || 1.5;
+          ctx.beginPath();
+          var started = false;
+          for (var i = 0; i < showCount; i++) {
+            var v = arr[offset + i];
+            if (v === null || v === undefined) {
+              started = false;
+              continue;
+            }
+            var x = xOf(i),
+              y = yOf(v);
+            if (!started) {
+              ctx.moveTo(x, y);
+              started = true;
+            } else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+
+        // Bollinger fill
+        if (overlays.bb) {
+          ctx.fillStyle = "rgba(100,100,180,0.06)";
+          ctx.beginPath();
+          var started = false,
+            firstX = 0;
+          for (var i = 0; i < showCount; i++) {
+            var v = bbF.upper[offset + i];
+            if (v === null) {
+              started = false;
+              continue;
+            }
+            var x = xOf(i),
+              y = yOf(v);
+            if (!started) {
+              ctx.moveTo(x, y);
+              firstX = x;
+              started = true;
+            } else ctx.lineTo(x, y);
+          }
+          for (var i = showCount - 1; i >= 0; i--) {
+            var v = bbF.lower[offset + i];
+            if (v === null) continue;
+            ctx.lineTo(xOf(i), yOf(v));
+          }
+          ctx.closePath();
+          ctx.fill();
+          drawLine(bbF.upper, "rgba(100,100,180,0.35)", 1);
+          drawLine(bbF.lower, "rgba(100,100,180,0.35)", 1);
+        }
+
+        if (overlays.sma20) drawLine(sma20F, "#f0b90b", 1.5);
+        if (overlays.sma50) drawLine(sma50F, "#e040fb", 1.5);
+        if (overlays.ema12) drawLine(ema12F, "#00bcd4", 1.2);
+        if (overlays.ema26) drawLine(ema26F, "#ff9800", 1.2);
+
+        // Volume bars
+        for (var i = 0; i < showCount; i++) {
+          var d = slice[i],
+            isUp = d.close >= d.open;
+          ctx.fillStyle = isUp ? "rgba(0,200,150,0.2)" : "rgba(255,71,87,0.2)";
+          var bw = Math.max(1, cW * 0.6);
+          ctx.fillRect(
+            xOf(i) - bw / 2,
+            vOf(d.volume),
+            bw,
+            padT + priceH + volH - 4 - vOf(d.volume),
+          );
+        }
+
+        // Candles
+        var bw = Math.max(1, cW * 0.65);
+        for (var i = 0; i < showCount; i++) {
+          var d = slice[i],
+            isUp = d.close >= d.open;
+          var color = isUp ? "#00c896" : "#ff4757";
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(xOf(i), yOf(d.high));
+          ctx.lineTo(xOf(i), yOf(d.low));
+          ctx.stroke();
+          var yTop = yOf(Math.max(d.open, d.close)),
+            yBot = yOf(Math.min(d.open, d.close));
+          var bodyH = Math.max(1, yBot - yTop);
+          ctx.fillStyle = color;
+          ctx.fillRect(xOf(i) - bw / 2, yTop, bw, bodyH);
+        }
+
+        // Current price line
+        var curPrice = slice[showCount - 1].close;
+        var curY = yOf(curPrice);
+        ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = "#d4a017";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, curY);
+        ctx.lineTo(W - padR, curY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#d4a017";
+        ctx.font = 'bold 10px "JetBrains Mono"';
+        ctx.fillText(fmtPrice(curPrice, pair), W - padR + 6, curY + 3);
+
+        // Hover
+        if (chartState.hoverIdx >= 0 && chartState.hoverIdx < showCount) {
+          var hi2 = chartState.hoverIdx,
+            hx = xOf(hi2);
+          ctx.setLineDash([2, 2]);
+          ctx.strokeStyle = "rgba(255,255,255,0.2)";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(hx, padT);
+          ctx.lineTo(hx, padT + priceH + volH);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          var d = slice[hi2];
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(
+            xOf(hi2) - bw / 2 - 1,
+            yOf(Math.max(d.open, d.close)) - 1,
+            bw + 2,
+            Math.max(
+              2,
+              yOf(Math.min(d.open, d.close)) -
+                yOf(Math.max(d.open, d.close)) +
+                2,
+            ),
+          );
+          var tt = document.getElementById("chartTooltip");
+          tt.classList.add("visible");
+          var t = new Date(d.time);
+          document.getElementById("ttTime").textContent =
+            t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
+            " " +
+            t.toLocaleDateString([], { month: "short", day: "numeric" });
+          document.getElementById("ttO").textContent = fmtPrice(d.open, pair);
+          document.getElementById("ttH").textContent = fmtPrice(d.high, pair);
+          document.getElementById("ttL").textContent = fmtPrice(d.low, pair);
+          document.getElementById("ttC").textContent = fmtPrice(d.close, pair);
+          document.getElementById("ttC").style.color =
+            d.close >= d.open ? "var(--buy)" : "var(--sell)";
+          document.getElementById("ttV").textContent = fmtVol(d.volume);
+        } else {
+          document.getElementById("chartTooltip").classList.remove("visible");
+        }
+
+        // Time labels
+        ctx.fillStyle = "#5c5c72";
+        ctx.font = '9px "JetBrains Mono"';
+        ctx.textAlign = "center";
+        var step = Math.max(1, Math.floor(showCount / 8));
+        for (var i = 0; i < showCount; i += step) {
+          var t = new Date(slice[i].time);
+          ctx.fillText(
+            t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            xOf(i),
+            H - 4,
+          );
+        }
+      }
+
+      document
+        .getElementById("chartCanvas")
+        .addEventListener("mousemove", function (e) {
+          var rect = this.getBoundingClientRect();
+          var x = e.clientX - rect.left;
+          var showCount = Math.min(80, chartData.length);
+          var W = rect.width,
+            padL = 10,
+            padR = 60;
+          var cW = (W - padL - padR) / showCount;
+          var idx = Math.floor((x - padL) / cW);
+          chartState.hoverIdx = idx >= 0 && idx < showCount ? idx : -1;
+          renderChart(chartData, currentPair, chartState.overlays);
+        });
+      document
+        .getElementById("chartCanvas")
+        .addEventListener("mouseleave", function () {
+          chartState.hoverIdx = -1;
+          renderChart(chartData, currentPair, chartState.overlays);
+        });
+      document
+        .getElementById("overlayBtns")
+        .addEventListener("click", function (e) {
+          var btn = e.target.closest(".overlay-btn");
+          if (!btn) return;
+          var key = btn.dataset.ov;
+          chartState.overlays[key] = !chartState.overlays[key];
+          btn.classList.toggle("active");
+          renderChart(chartData, currentPair, chartState.overlays);
+        });
+
+      /* ================================================================
+   GAUGE RENDERER
+   ================================================================ */
+      function renderGauge(signal) {
+        var canvas = document.getElementById("gaugeCanvas");
+        var dpr = window.devicePixelRatio || 1;
+        var W = 260,
+          H = 150;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + "px";
+        canvas.style.height = H + "px";
+        var ctx = canvas.getContext("2d");
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, W, H);
+
+        var cx = W / 2,
+          cy = H - 16,
+          R = 100;
+        var startA = Math.PI,
+          endA = 2 * Math.PI;
+        var val = clamp(signal, -1, 1);
+        var needleA = Math.PI + ((val + 1) / 2) * Math.PI;
+
+        // Background arc
+        ctx.lineWidth = 16;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#1a1a30";
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, startA, endA);
+        ctx.stroke();
+
+        // Color segments
+        var segs = [
+          { f: 0, t: 0.2, c: "#ff4757" },
+          { f: 0.2, t: 0.35, c: "#ff6b81" },
+          { f: 0.35, t: 0.5, c: "#ffa502" },
+          { f: 0.5, t: 0.65, c: "#eccc68" },
+          { f: 0.65, t: 0.8, c: "#7bed9f" },
+          { f: 0.8, t: 1, c: "#00c896" },
+        ];
+        for (var i = 0; i < segs.length; i++) {
+          ctx.strokeStyle = segs[i].c;
+          ctx.beginPath();
+          ctx.arc(
+            cx,
+            cy,
+            R,
+            startA + segs[i].f * Math.PI,
+            startA + segs[i].t * Math.PI,
+          );
+          ctx.stroke();
+        }
+
+        // Labels
+        ctx.fillStyle = "#5c5c72";
+        ctx.font = '8px "Space Grotesk"';
+        ctx.textAlign = "center";
+        var labels = [
+          "STRONG SELL",
+          "SELL",
+          "",
+          "NEUTRAL",
+          "",
+          "BUY",
+          "STRONG BUY",
+        ];
+        for (var i = 0; i < labels.length; i++) {
+          if (!labels[i]) continue;
+          var a = startA + (i / (labels.length - 1)) * Math.PI;
+          ctx.fillText(
+            labels[i],
+            cx + Math.cos(a) * (R + 16),
+            cy + Math.sin(a) * (R + 16) + 3,
+          );
+        }
+
+        // Needle
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(needleA);
+        ctx.beginPath();
+        ctx.moveTo(0, -2.5);
+        ctx.lineTo(R - 14, 0);
+        ctx.lineTo(0, 2.5);
+        ctx.closePath();
+        ctx.fillStyle = "#e2e2f0";
+        ctx.fill();
+        ctx.restore();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#d4a017";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#080810";
+        ctx.fill();
+      }
+
+      /* ================================================================
+   UI CONTROLLER
+   ================================================================ */
+      var currentPair = "BTCUSD",
+        currentTF = "1H",
+        chartData = [],
+        analysis = null;
+      var signalHistory = [];
+      var isUpdating = false; // Re-entry guard
+
+      function showError(msg) {
+        var banner = document.getElementById("errorBanner");
+        document.getElementById("errorText").textContent = msg;
+        banner.style.display = "block";
+      }
+
+      function hideError() {
+        document.getElementById("errorBanner").style.display = "none";
+      }
+
+      function updateClock() {
+        document.getElementById("clock").textContent =
+          new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      function updateAll() {
+        if (isUpdating) return; // Prevent overlapping updates
+        isUpdating = true;
+        hideError();
+        var overlay = document.getElementById("loadingOverlay");
+        overlay.classList.remove("hidden");
+
+        setTimeout(function () {
+          try {
+            chartData = generateOHLCV(currentPair, currentTF);
+            analysis = analyzeAll(chartData, currentPair);
+            var lc = chartData[chartData.length - 1];
+            var prev = chartData[chartData.length - 2];
+            var change = ((lc.close - prev.close) / prev.close) * 100;
+
+            // Price info
+            document.getElementById("priceMain").textContent = fmtPrice(
+              lc.close,
+              currentPair,
+            );
+            var chEl = document.getElementById("priceChange");
+            chEl.textContent = fmtPct(change);
+            chEl.style.color = change >= 0 ? "var(--buy)" : "var(--sell)";
+            document.getElementById("ohlcO").textContent = fmtPrice(
+              lc.open,
+              currentPair,
+            );
+            document.getElementById("ohlcH").textContent = fmtPrice(
+              lc.high,
+              currentPair,
+            );
+            document.getElementById("ohlcL").textContent = fmtPrice(
+              lc.low,
+              currentPair,
+            );
+            document.getElementById("ohlcC").textContent = fmtPrice(
+              lc.close,
+              currentPair,
+            );
+
+            // Signal label
+            var sig = analysis.overallSignal;
+            var sigLabel, sigColor;
+            if (sig > 0.4) {
+              sigLabel = "STRONG BUY";
+              sigColor = "var(--buy)";
+            } else if (sig > 0.1) {
+              sigLabel = "BUY";
+              sigColor = "var(--buy)";
+            } else if (sig > -0.1) {
+              sigLabel = "NEUTRAL";
+              sigColor = "var(--neut)";
+            } else if (sig > -0.4) {
+              sigLabel = "SELL";
+              sigColor = "var(--sell)";
+            } else {
+              sigLabel = "STRONG SELL";
+              sigColor = "var(--sell)";
+            }
+            var sigBig = document.getElementById("signalBig");
+            sigBig.textContent = sigLabel;
+            sigBig.style.color = sigColor;
+
+            renderGauge(sig);
+
+            var gBox = document.getElementById("gaugeBox");
+            gBox.classList.remove("pulse-buy", "pulse-sell");
+            if (Math.abs(sig) > 0.5)
+              gBox.classList.add(sig > 0 ? "pulse-buy" : "pulse-sell");
+
+            var conf = analysis.confidence;
+            var confFill = document.getElementById("confFill");
+            confFill.style.width = conf + "%";
+            confFill.style.background =
+              conf > 60
+                ? "var(--buy)"
+                : conf > 40
+                  ? "var(--accent)"
+                  : "var(--neut)";
+            document.getElementById("confText").textContent =
+              conf.toFixed(0) + "%";
+
+            document.getElementById("buyCount").textContent = analysis.buys;
+            document.getElementById("sellCount").textContent = analysis.sells;
+            document.getElementById("neutCount").textContent = analysis.neuts;
+
+            document.getElementById("summaryText").textContent =
+              generateSummary(currentPair, currentTF, analysis);
+            document.getElementById("chartTitle").textContent =
+              currentPair + " \u2014 " + currentTF;
+
+            renderTable(analysis.indicators);
+            renderCards(analysis.indicators);
+            renderChart(chartData, currentPair, chartState.overlays);
+
+            addHistory(currentPair, currentTF, sigLabel, sig, conf, lc.close);
+            renderHistory();
+          } catch (err) {
+            console.error("Update error:", err);
+            showError(
+              "Analysis error: " +
+                err.message +
+                ". The page will retry on next refresh.",
+            );
+          } finally {
+            // ALWAYS hide the overlay, even if an error occurred
+            overlay.classList.add("hidden");
+            isUpdating = false;
+          }
+        }, 250);
+      }
+
+      function renderTable(indicators) {
+        var tbody = document.getElementById("sigTableBody");
+        document.getElementById("tableCount").textContent =
+          indicators.length + " indicators";
+        var html = "";
+        for (var i = 0; i < indicators.length; i++) {
+          var ind = indicators[i];
+          var bc =
+            ind.signal > 0
+              ? "badge-buy"
+              : ind.signal < 0
+                ? "badge-sell"
+                : "badge-neut";
+          var bt = ind.signal > 0 ? "BUY" : ind.signal < 0 ? "SELL" : "NEUTRAL";
+          var sc =
+            ind.signal > 0
+              ? "var(--buy)"
+              : ind.signal < 0
+                ? "var(--sell)"
+                : "var(--neut)";
+          html +=
+            '<tr><td class="ind-name">' +
+            ind.name +
+            '</td><td class="ind-val">' +
+            ind.displayValue +
+            '</td><td><span class="badge ' +
+            bc +
+            '">' +
+            bt +
+            '</span></td><td><span class="strength-bar"><span class="strength-fill" style="width:' +
+            ind.strength * 100 +
+            "%;background:" +
+            sc +
+            '"></span></span><span class="mono" style="font-size:.7rem;color:var(--tx3)">' +
+            (ind.strength * 100).toFixed(0) +
+            '%</span></td><td><span class="cat-badge">' +
+            ind.category +
+            '</span></td><td style="font-size:.74rem;color:var(--tx3)">' +
+            ind.detail +
+            "</td></tr>";
+        }
+        tbody.innerHTML = html;
+      }
+
+      function renderCards(indicators) {
+        var grid = document.getElementById("cardsGrid");
+        var html = "";
+        for (var i = 0; i < indicators.length; i++) {
+          var ind = indicators[i];
+          var bc =
+            ind.signal > 0
+              ? "badge-buy"
+              : ind.signal < 0
+                ? "badge-sell"
+                : "badge-neut";
+          var bt = ind.signal > 0 ? "BUY" : ind.signal < 0 ? "SELL" : "NEUTRAL";
+          var sc =
+            ind.signal > 0
+              ? "var(--buy)"
+              : ind.signal < 0
+                ? "var(--sell)"
+                : "var(--neut)";
+          html +=
+            '<div class="ind-card fade-up" style="animation-delay:' +
+            i * 25 +
+            'ms"><div class="ind-card-top"><span class="ind-card-name">' +
+            ind.name +
+            '</span><span class="ind-card-cat">' +
+            ind.category +
+            '</span></div><div class="ind-card-val" style="color:' +
+            sc +
+            '">' +
+            ind.displayValue +
+            '</div><div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin:5px 0"><div style="height:100%;width:' +
+            ind.strength * 100 +
+            "%;background:" +
+            sc +
+            ';border-radius:2px;transition:width .4s"></div></div><div class="ind-card-bottom"><div class="ind-card-detail">' +
+            ind.detail +
+            '</div><span class="badge ' +
+            bc +
+            '" style="flex-shrink:0">' +
+            bt +
+            "</span></div></div>";
+        }
+        grid.innerHTML = html;
+      }
+
+      function addHistory(pair, tf, sigLabel, sig, conf, price) {
+        signalHistory.unshift({
+          time: new Date(),
+          pair: pair,
+          tf: tf,
+          sigLabel: sigLabel,
+          sig: sig,
+          conf: conf,
+          price: price,
+        });
+        if (signalHistory.length > 20) signalHistory.pop();
+      }
+
+      function renderHistory() {
+        document.getElementById("histCount").textContent =
+          signalHistory.length + " records";
+        var tbody = document.getElementById("histBody");
+        var html = "";
+        for (var i = 0; i < signalHistory.length; i++) {
+          var h = signalHistory[i];
+          var color =
+            h.sigLabel.indexOf("BUY") >= 0
+              ? "var(--buy)"
+              : h.sigLabel.indexOf("SELL") >= 0
+                ? "var(--sell)"
+                : "var(--neut)";
+          html +=
+            '<tr><td class="mono" style="font-size:.73rem">' +
+            h.time.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }) +
+            '</td><td style="font-weight:600">' +
+            h.pair +
+            '</td><td class="mono">' +
+            h.tf +
+            '</td><td style="color:' +
+            color +
+            ';font-weight:700">' +
+            h.sigLabel +
+            '</td><td class="mono">' +
+            Math.abs(h.sig).toFixed(3) +
+            '</td><td class="mono">' +
+            h.conf.toFixed(0) +
+            '%</td><td class="mono">' +
+            fmtPrice(h.price, h.pair) +
+            "</td></tr>";
+        }
+        tbody.innerHTML = html;
+      }
+
+      // Event listeners
+      document
+        .getElementById("pairTabs")
+        .addEventListener("click", function (e) {
+          var tab = e.target.closest(".pair-tab");
+          if (!tab || tab.classList.contains("active")) return;
+          var tabs = this.querySelectorAll(".pair-tab");
+          for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove("active");
+            tabs[i].setAttribute("aria-selected", "false");
+          }
+          tab.classList.add("active");
+          tab.setAttribute("aria-selected", "true");
+          currentPair = tab.dataset.pair;
+          updateAll();
+        });
+
+      document.querySelector(".tf-bar").addEventListener("click", function (e) {
+        var btn = e.target.closest(".tf-btn");
+        if (!btn || btn.classList.contains("active")) return;
+        var btns = this.querySelectorAll(".tf-btn");
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].classList.remove("active");
+          btns[i].setAttribute("aria-selected", "false");
+        }
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        currentTF = btn.dataset.tf;
+        updateAll();
+      });
+
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", function () {
+          this.classList.add("spinning");
+          updateAll();
+          var self = this;
+          setTimeout(function () {
+            self.classList.remove("spinning");
+          }, 700);
+        });
+
+      // Auto-refresh
+      var autoInterval = null;
+      function startAuto() {
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(updateAll, 30000);
+      }
+      function stopAuto() {
+        if (autoInterval) {
+          clearInterval(autoInterval);
+          autoInterval = null;
+        }
+      }
+      document
+        .getElementById("autoRefresh")
+        .addEventListener("change", function () {
+          this.checked ? startAuto() : stopAuto();
+        });
+
+      // Resize
+      var resizeTimer;
+      window.addEventListener("resize", function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          if (chartData.length)
+            renderChart(chartData, currentPair, chartState.overlays);
+          if (analysis) renderGauge(analysis.overallSignal);
+        }, 150);
+      });
+
+      // Keyboard nav
+      document.addEventListener("keydown", function (e) {
+        var tfs = ["1m", "5m", "15m", "30m", "1H", "4H", "1D", "1W"];
+        var idx = tfs.indexOf(currentTF);
+        if (e.key === "ArrowRight" && idx < tfs.length - 1) {
+          currentTF = tfs[idx + 1];
+          var btns = document.querySelectorAll(".tf-btn");
+          for (var i = 0; i < btns.length; i++)
+            btns[i].classList.toggle(
+              "active",
+              btns[i].dataset.tf === currentTF,
+            );
+          updateAll();
+        } else if (e.key === "ArrowLeft" && idx > 0) {
+          currentTF = tfs[idx - 1];
+          var btns = document.querySelectorAll(".tf-btn");
+          for (var i = 0; i < btns.length; i++)
+            btns[i].classList.toggle(
+              "active",
+              btns[i].dataset.tf === currentTF,
+            );
+          updateAll();
+        }
+      });
+
+      /* ================================================================
+   INITIALIZATION
+   ================================================================ */
+      updateAll();
+      startAuto();
+    </script>
+  </body>
+</html>

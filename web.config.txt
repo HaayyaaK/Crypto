@@ -1,0 +1,9 @@
+<system.webServer>
+  <httpProtocol>
+    <customHeaders>
+      <add name="X-Content-Type-Options" value="nosniff" />
+      <add name="X-Frame-Options" value="SAMEORIGIN" />
+      <add name="Referrer-Policy" value="strict-origin-when-cross-origin" />
+    </customHeaders>
+  </httpProtocol>
+</system.webServer>
